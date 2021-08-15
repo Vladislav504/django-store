@@ -1,2 +1,7 @@
 Good id: {{item.id}}
 Good name: {{item.name}}
+<h1>Sellers:</h1>
+{% for transaction in selling%}
+    Address: {{transaction.seller.address}}
+    Price: {{transaction.price}}
+{%endfor%}
