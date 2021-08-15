@@ -1,7 +1,12 @@
-<h1>Home</h1>
+<a href="{% url 'goods_list' %}">
+    <h1>Home</h1>
+</a>
 {% if user.is_authenticated %}
     Hello
+    <br>
     Address: {{user.address}}
+    <br>
+    Balance: {{balance}}
     <form action="{% url 'logout' %}" method="post">
         {% csrf_token %}
         <input type="submit" value="Logging Out?">
