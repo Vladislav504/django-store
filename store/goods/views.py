@@ -1,5 +1,5 @@
-from django.db.models.query_utils import Q
-from django.http.response import Http404, HttpResponseBadRequest
+from django.urls import reverse
+from django.http.response import  HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic import TemplateView
 
@@ -25,4 +25,17 @@ class GoodView(TemplateView):
         selling = Transaction.objects.filter(seller__isnull=False, completed=False, buyer__isnull=True)
         context = {'item': good, 'selling': selling}
         return render(request, self.template_name, context=context)
+    
+
+    def post(self, request, id):
+        try:
+            good = Good.objects.get(id=id)
+        except Good.DoesNotExist:
+            return HttpResponseBadRequest({})
+        try:
+            price = float(request.POST['price'])
+        except ValueError:
+            return HttpResponseBadRequest("Inappropriate value")
+        Transaction(seller=request.user, good=good, completed=False, price=price).save()
+        return HttpResponseRedirect(reverse('goods_detail', args=[id]))
         

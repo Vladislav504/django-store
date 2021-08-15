@@ -1,7 +1,16 @@
-Good id: {{item.id}}
-Good name: {{item.name}}
-<h1>Sellers:</h1>
+<h1>
+    {{item.name}}
+</h1>
+<p>Do you wanna sell item?</p>
+<form action="{% url 'goods_detail' item.id%}" method="POST">
+    {% csrf_token %}
+    <input type="text" id="price" name="price">
+    <input type="submit" value="submit">
+</form>
+<h2>Sellers:</h2>
 {% for transaction in selling%}
     Address: {{transaction.seller.address}}
     Price: {{transaction.price}}
+    
+    <br>
 {%endfor%}
