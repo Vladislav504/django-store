@@ -24,4 +24,15 @@ class FundInView(TemplateView):
         if wallet.is_authenticated:
             Transaction(seller=wallet, price=price, completed=True).save()
         return HttpResponseRedirect(reverse('fundin'))
+
+
+class BuyView(TemplateView):
+    template_name = 'transactions/buy.html'
+
+    def get(self, request, id):
+        trans = Transaction.objects.get(id=id)
+        return render(request, self.template_name, context={'transaction': trans})
+
+class SellView(TemplateView):
+    template_name = 'transactions/sell.html'
     

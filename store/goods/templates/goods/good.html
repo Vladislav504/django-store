@@ -19,11 +19,13 @@
 {% for transaction in selling%}
     Address: {{transaction.seller.address}}
     Price: {{transaction.price}}
+    <a href="{% url 'transaction_buy' transaction.id%}">Buy</a>
     <br>
-{%endfor%}
-<h2>Buyers:</h2>
-{% for transaction in buying%}
+    {%endfor%}
+    <h2>Buyers:</h2>
+    {% for transaction in buying%}
     Address: {{transaction.buyer.address}}
     Price: {{transaction.price}}
+    <a href="{% url 'transaction_sell' transaction.id%}">Sell</a>
     <br>
 {%endfor%}
