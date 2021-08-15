@@ -4,3 +4,7 @@ Seller: {{transaction.seller}}
 Good: {{transaction.good.name}}
 <br>
 Price: {{transaction.price}}
+<form action="{% url 'transaction_buy' transaction.id %}" method="POST">
+    {% csrf_token %}
+    <input type="submit" value="BUY">
+</form>
