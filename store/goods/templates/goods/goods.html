@@ -1,4 +1,8 @@
+<h1>Available goods:</h1>
+<br>
 {% for good in goods %}
-{{good.id}} {{good.name}}    
+<a href="{% url 'goods_detail' good.id%}">
+    {{good.name}}    
+</a>
 <br>
 {%endfor%}
