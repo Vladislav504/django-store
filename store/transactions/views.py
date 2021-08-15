@@ -24,3 +24,4 @@ class FundInView(TemplateView):
         if wallet.is_authenticated:
             Transaction(seller=wallet, price=price, completed=True).save()
         return HttpResponseRedirect(reverse('fundin'))
+    

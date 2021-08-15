@@ -23,7 +23,8 @@ class GoodView(TemplateView):
         except Good.DoesNotExist:
             return HttpResponseBadRequest({})
         selling = Transaction.objects.filter(seller__isnull=False, completed=False, buyer__isnull=True)
-        context = {'item': good, 'selling': selling}
+        buying = Transaction.objects.filter(seller__isnull=True, completed=False, buyer__isnull=False)
+        context = {'item': good, 'selling': selling, 'buying': buying}
         return render(request, self.template_name, context=context)
     
 
@@ -36,6 +37,14 @@ class GoodView(TemplateView):
             price = float(request.POST['price'])
         except ValueError:
             return HttpResponseBadRequest("Inappropriate value")
-        Transaction(seller=request.user, good=good, completed=False, price=price).save()
+        type_ = request.POST['type']
+        trans = Transaction(good=good, completed=False, price=price)
+        if type_ == 'sell':
+            trans.seller = request.user
+        elif type_ == 'buy':
+            trans.buyer = request.user
+        else:
+            return HttpResponseBadRequest("Inappropriate type")
+        trans.save()
         return HttpResponseRedirect(reverse('goods_detail', args=[id]))
         

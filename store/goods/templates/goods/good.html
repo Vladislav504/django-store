@@ -5,12 +5,25 @@
 <form action="{% url 'goods_detail' item.id%}" method="POST">
     {% csrf_token %}
     <input type="text" id="price" name="price">
+    <input type="hidden" name="type" id="type" value="sell">
+    <input type="submit" value="submit">
+</form>
+<p>Do you wanna buy item?</p>
+<form action="{% url 'goods_detail' item.id%}" method="POST">
+    {% csrf_token %}
+    <input type="text" id="price" name="price">
+    <input type="hidden" name="type" id="type" value="buy">
     <input type="submit" value="submit">
 </form>
 <h2>Sellers:</h2>
 {% for transaction in selling%}
     Address: {{transaction.seller.address}}
     Price: {{transaction.price}}
-    
+    <br>
+{%endfor%}
+<h2>Buyers:</h2>
+{% for transaction in buying%}
+    Address: {{transaction.buyer.address}}
+    Price: {{transaction.price}}
     <br>
 {%endfor%}
