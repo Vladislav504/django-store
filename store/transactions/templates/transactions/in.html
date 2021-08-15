@@ -1,0 +1,12 @@
+{% if user.is_authenticated %}
+hello: {{user.address}}
+<br>
+balance: {{balance}}
+<form action="{% url 'fundin'%}" method="POST">
+    {%csrf_token%}
+    <input type="text" id="sum" name="sum">
+    <input type="submit" value="Get">
+</form>
+{%else%}
+You are not authenticated!
+{%endif%}
