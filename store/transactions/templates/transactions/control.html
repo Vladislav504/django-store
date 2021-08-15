@@ -1,0 +1,19 @@
+{% if user.is_authenticated %}
+hello: {{user.address}}
+<br>
+balance: {{balance}}
+<form action="{% url 'control'%}" method="POST">
+    {%csrf_token%}
+    <input type="text" id="sum" name="sum">
+    <input type="hidden" id="type" name="type" value="in">
+    <input type="submit" value="Get">
+</form>
+<form action="{% url 'control'%}" method="POST">
+    {%csrf_token%}
+    <input type="text" id="sum" name="sum">
+    <input type="hidden" id="type" name="type" value="out">
+    <input type="submit" value="Withdraw">
+</form>
+{%else%}
+You are not authenticated!
+{%endif%}
