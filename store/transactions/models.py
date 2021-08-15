@@ -20,7 +20,7 @@ class Transaction(models.Model):
     price = models.FloatField(null=False, default=0.0)
 
     completed = models.BooleanField(default=False)
-# 2ed764583713451682774232822a111d
+    
     class SellerEqualBuyer(Exception):
         pass
 
