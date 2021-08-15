@@ -12,3 +12,4 @@ pytest-pythonpath==0.7.3
 pytz==2021.1
 sqlparse==0.4.1
 toml==0.10.2
+yapf==0.31.0
