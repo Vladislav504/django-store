@@ -22,8 +22,8 @@ class GoodView(TemplateView):
             good = Good.objects.get(id=id)
         except Good.DoesNotExist:
             return HttpResponseBadRequest({})
-        selling = Transaction.objects.filter(seller__isnull=False, completed=False, buyer__isnull=True)
-        buying = Transaction.objects.filter(seller__isnull=True, completed=False, buyer__isnull=False)
+        selling = Transaction.objects.filter(seller__isnull=False, completed=False, buyer__isnull=True).order_by('price')
+        buying = Transaction.objects.filter(seller__isnull=True, completed=False, buyer__isnull=False).order_by('price')
         context = {'item': good, 'selling': selling, 'buying': buying}
         return render(request, self.template_name, context=context)
     
