@@ -1,4 +1,5 @@
-from django.http.response import HttpResponseRedirect
+from django.core.checks.messages import Error
+from django.http.response import HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.urls import reverse
@@ -6,15 +7,13 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from wallets.services import get_balance
 from .models import Transaction
+from store.utils import validate_price
+from .services import validate_type, InvalidTypeOfTransaction, create_completed_transaction
 
 
 class ControlView(LoginRequiredMixin, TemplateView):
     template_name = 'transactions/control.html'
-    validator = float
-
-    def dispatch(self, request, *args, **kwargs):
-        self.wallet = request.user
-        return super().dispatch(request, *args, **kwargs)
+    error = None
 
     def get(self, request):
         return render(request,
@@ -22,33 +21,25 @@ class ControlView(LoginRequiredMixin, TemplateView):
                       context={'balance': get_balance(self.wallet)})
 
     def post(self, request):
-        price = self.validate_sum(request.POST['sum'])
-        type_ = self.validate_type(request.POST['type'])
-        self.create_transaction(price, type_)
+        self.get_price()
+        self.get_type()
+        if self.error:
+            return self.error
+        create_completed_transaction(self.price, self.type_)
         return HttpResponseRedirect(reverse('control'))
 
-    def validate_sum(self, sum_: str):
+    def get_price(self):
         try:
-            return self.validator(sum_)
+            self.price = validate_price(self.request.POST['price'])
         except ValueError:
-            return self.validator(0)
+            self.error = HttpResponseBadRequest("Inappropriate value")
 
-    def validate_type(self, type_: str):
-        if type_ not in ['in', 'out']:
-            raise ValueError('Type is wrong.')
-        return type_
-
-    def create_transaction(self, price, type_):
-        trans = Transaction(price=price, completed=True)
-        trans = self.fill_or_withdraw(trans, type_)
-        trans.save()
-
-    def fill_or_withdraw(self, trans: Transaction, type_: str) -> Transaction:
-        if type_ == 'in':
-            trans.seller = self.wallet
-        elif type_ == 'out':
-            trans.buyer = self.wallet
-        return trans
+    def get_type(self):
+        try:
+            self.type_ = self.request.POST['type']
+            validate_type(self.type_)
+        except InvalidTypeOfTransaction:
+            self.error = HttpResponseBadRequest("Inappropriate type")
 
 
 class BuyView(LoginRequiredMixin, TemplateView):
@@ -62,10 +53,7 @@ class BuyView(LoginRequiredMixin, TemplateView):
 
     def post(self, request, id):
         trans: Transaction = Transaction.objects.get(id=id)
-        if not trans.completed:
-            trans.buyer = request.user
-            trans.completed = True
-            trans.save()
+        trans.buy_by(request.user)
         return HttpResponseRedirect(
             reverse('goods_detail', args=[trans.good.id]))
 

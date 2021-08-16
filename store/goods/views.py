@@ -3,10 +3,12 @@ from django.urls import reverse
 from django.http.response import HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic import TemplateView
-from django.contrib.auth.decorators import login_required
 
 from .models import Good
-from transactions.models import Transaction
+from store.utils import validate_price
+from transactions.services import InvalidTypeOfTransaction, validate_type
+from transactions.services import get_uncompleted_transactions
+from transactions.services import create_uncompleted_transaction
 
 
 class GoodsView(TemplateView):
@@ -19,37 +21,39 @@ class GoodsView(TemplateView):
 
 class GoodView(LoginRequiredMixin, TemplateView):
     template_name = 'goods/good.html'
-
-    def dispatch(self, request, *args, **kwargs):
-        id = kwargs.get('id')
-        try:
-            self.good = Good.objects.get(id=id)
-        except Good.DoesNotExist:
-            return HttpResponseBadRequest({})
-        return super().dispatch(request, *args, **kwargs)
+    error = None
 
     def get(self, request, id):
-        selling = Transaction.objects.filter(
-            seller__isnull=False, completed=False,
-            buyer__isnull=True).order_by('price')
-        buying = Transaction.objects.filter(
-            seller__isnull=True, completed=False,
-            buyer__isnull=False).order_by('price')
+        self.get_good(id)
+        selling, buying = get_uncompleted_transactions()
         context = {'item': self.good, 'selling': selling, 'buying': buying}
         return render(request, self.template_name, context=context)
 
     def post(self, request, id):
-        try:
-            price = float(request.POST['price'])
-        except ValueError:
-            return HttpResponseBadRequest("Inappropriate value")
-        type_ = request.POST['type']
-        trans = Transaction(good=self.good, completed=False, price=price)
-        if type_ == 'sell':
-            trans.seller = request.user
-        elif type_ == 'buy':
-            trans.buyer = request.user
-        else:
-            return HttpResponseBadRequest("Inappropriate type")
-        trans.save()
+        self.get_good(id)
+        self.get_price()
+        self.get_type()
+        if self.error:
+            return self.error
+        create_uncompleted_transaction(request.user, self.type_, self.good,
+                                       self.price)
         return HttpResponseRedirect(reverse('goods_detail', args=[id]))
+
+    def get_good(self, id):
+        try:
+            self.good = Good.objects.get(id=id)
+        except Good.DoesNotExist:
+            self.error = HttpResponseBadRequest('No such Good.')
+
+    def get_price(self):
+        try:
+            self.price = validate_price(self.request.POST['price'])
+        except ValueError:
+            self.error = HttpResponseBadRequest("Inappropriate value")
+
+    def get_type(self):
+        try:
+            self.type_ = self.request.POST['type']
+            validate_type(self.type_)
+        except InvalidTypeOfTransaction:
+            self.error = HttpResponseBadRequest("Inappropriate type")
