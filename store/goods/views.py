@@ -1,10 +1,12 @@
 from django.urls import reverse
-from django.http.response import  HttpResponseBadRequest, HttpResponseRedirect
+from django.http.response import HttpResponseBadRequest, HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic import TemplateView
+from django.contrib.auth.decorators import login_required
 
 from .models import Good
 from transactions.models import Transaction
+
 
 class GoodsView(TemplateView):
     template_name = 'goods/goods.html'
@@ -22,12 +24,16 @@ class GoodView(TemplateView):
             good = Good.objects.get(id=id)
         except Good.DoesNotExist:
             return HttpResponseBadRequest({})
-        selling = Transaction.objects.filter(seller__isnull=False, completed=False, buyer__isnull=True).order_by('price')
-        buying = Transaction.objects.filter(seller__isnull=True, completed=False, buyer__isnull=False).order_by('price')
+        selling = Transaction.objects.filter(
+            seller__isnull=False, completed=False,
+            buyer__isnull=True).order_by('price')
+        buying = Transaction.objects.filter(
+            seller__isnull=True, completed=False,
+            buyer__isnull=False).order_by('price')
         context = {'item': good, 'selling': selling, 'buying': buying}
         return render(request, self.template_name, context=context)
-    
 
+    @login_required
     def post(self, request, id):
         try:
             good = Good.objects.get(id=id)
@@ -47,4 +53,3 @@ class GoodView(TemplateView):
             return HttpResponseBadRequest("Inappropriate type")
         trans.save()
         return HttpResponseRedirect(reverse('goods_detail', args=[id]))
-        
