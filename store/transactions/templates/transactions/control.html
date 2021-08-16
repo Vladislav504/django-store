@@ -4,14 +4,14 @@ hello: {{user.address}}
 balance: {{balance}}
 <form action="{% url 'control'%}" method="POST">
     {%csrf_token%}
-    <input type="text" id="sum" name="sum">
-    <input type="hidden" id="type" name="type" value="in">
+    <input type="text" id="price" name="price">
+    <input type="hidden" id="type" name="type" value="sell">
     <input type="submit" value="Get">
 </form>
 <form action="{% url 'control'%}" method="POST">
     {%csrf_token%}
-    <input type="text" id="sum" name="sum">
-    <input type="hidden" id="type" name="type" value="out">
+    <input type="text" id="price" name="price">
+    <input type="hidden" id="type" name="type" value="buy">
     <input type="submit" value="Withdraw">
 </form>
 {%else%}
