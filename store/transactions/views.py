@@ -1,18 +1,14 @@
-from typing import Type
-from django.http.response import HttpResponseBadRequest, HttpResponseRedirect
+from django.http.response import HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic import TemplateView
 from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from wallets.models import Wallet
 from wallets.services import get_balance
 from .models import Transaction
 
-class AuthRequiredMixin(LoginRequiredMixin):
-    login_url = 'wallets/login'
 
-class ControlView(AuthRequiredMixin, TemplateView):
+class ControlView(LoginRequiredMixin, TemplateView):
     template_name = 'transactions/control.html'
     validator = float
 
@@ -20,13 +16,11 @@ class ControlView(AuthRequiredMixin, TemplateView):
         self.wallet = request.user
         return super().dispatch(request, *args, **kwargs)
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
-
     def get(self, request):
-        return render(request, self.template_name, context={'balance': get_balance(self.wallet)})
-    
+        return render(request,
+                      self.template_name,
+                      context={'balance': get_balance(self.wallet)})
+
     def post(self, request):
         price = self.validate_sum(request.POST['sum'])
         type_ = self.validate_type(request.POST['type'])
@@ -38,12 +32,12 @@ class ControlView(AuthRequiredMixin, TemplateView):
             return self.validator(sum_)
         except ValueError:
             return self.validator(0)
-    
+
     def validate_type(self, type_: str):
-        if not type_ in ['in', 'out']:
+        if type_ not in ['in', 'out']:
             raise ValueError('Type is wrong.')
         return type_
-    
+
     def create_transaction(self, price, type_):
         trans = Transaction(price=price, completed=True)
         trans = self.fill_or_withdraw(trans, type_)
@@ -56,21 +50,25 @@ class ControlView(AuthRequiredMixin, TemplateView):
             trans.buyer = self.wallet
         return trans
 
-class BuyView(AuthRequiredMixin, TemplateView):
+
+class BuyView(LoginRequiredMixin, TemplateView):
     template_name = 'transactions/buy.html'
 
     def get(self, request, id):
         trans = Transaction.objects.get(id=id)
-        return render(request, self.template_name, context={'transaction': trans})
-    
+        return render(request,
+                      self.template_name,
+                      context={'transaction': trans})
+
     def post(self, request, id):
         trans: Transaction = Transaction.objects.get(id=id)
         if not trans.completed:
             trans.buyer = request.user
             trans.completed = True
             trans.save()
-        return HttpResponseRedirect(reverse('goods_detail', args=[trans.good.id]))
+        return HttpResponseRedirect(
+            reverse('goods_detail', args=[trans.good.id]))
+
 
 class SellView(TemplateView):
     template_name = 'transactions/sell.html'
-    
