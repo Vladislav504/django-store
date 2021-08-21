@@ -1,0 +1,54 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="{% static 'header.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'content.css' %}" />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{% static 'goods_list.css' %}"
+    />
+    <title>{% block title%}Django Store{% endblock title%}</title>
+  </head>
+  <body>
+    <div id="header">
+      <ul id="sections">
+        <a href="{% url 'home' %}">
+          <li>Home</li>
+        </a>
+        <a href="{% url 'goods_list' %}">
+          <li>Goods</li>
+        </a>
+      </ul>
+      {% if user.is_authenticated %}
+      <ul id="user">
+        <li>Balance: {{balance}}</li>
+        <li>
+          <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <input type="submit" value="Logout" />
+          </form>
+        </li>
+      </ul>
+      {% else %}
+      <ul id="sections">
+        <a href="{% url 'login' %}">
+          <li>Login</li>
+        </a>
+        <a href="{% url 'register' %}">
+          <li>Register</li>
+        </a>
+      </ul>
+      {% endif %}
+    </div>
+    <div id="content">
+      {% block content%}
+      <h1>No content</h1>
+      {% endblock content%}
+    </div>
+  </body>
+</html>
