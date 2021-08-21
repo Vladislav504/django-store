@@ -45,13 +45,16 @@ def create_completed_transaction(user, type_, good, price):
     return trans
 
 
-def get_uncompleted_transactions():
+def get_uncompleted_transactions(good=None):
     selling = Transaction.objects.filter(seller__isnull=False,
                                          completed=False,
                                          buyer__isnull=True).order_by('price')
     buying = Transaction.objects.filter(seller__isnull=True,
                                         completed=False,
                                         buyer__isnull=False).order_by('price')
+    if good is not None:
+        selling = selling.filter(good=good)
+        buying = buying.filter(good=good)
     return selling, buying
 
 
