@@ -1,8 +1,14 @@
+{% extends 'base.html' %} {% load static %} {% block content %}
 <h1>Available goods:</h1>
-<br>
-{% for good in goods %}
-<a href="{% url 'goods_detail' good.id%}">
-    {{good.name}}    
-</a>
-<br>
-{%endfor%}
+
+<div class="goods-list">
+  {% for good in goods %}
+  <a href="{% url 'goods_detail' good.id%}">
+    <div class="card">
+      <div class="photo">Photo</div>
+      <div class="name"> {{good.name}} </div>
+    </div>
+  </a>
+  {%endfor%}
+</div>
+{% endblock content%}

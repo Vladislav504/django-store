@@ -1,0 +1,38 @@
+.goods-list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+    
+}
+
+.goods-list a {
+    text-decoration: none;
+}
+
+.card {
+    height: 300px;
+    width: 200px;
+    background: #aaa;
+}
+
+.photo {
+    display: flex;
+    min-height: 80%;
+    width: 100%;
+    background: white;
+    justify-content: center;
+    align-items: center;
+}
+
+.name {
+    min-height: 20%;
+    display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: black;
+  font-weight: 700;
+  
+}
