@@ -1,9 +1,12 @@
+
+{% extends 'base.html' %}
+{% block content%}
 {% if user.is_authenticated %}
-    You are logged in!
-    <form action="{% url 'logout' %}" method="post">
-        {% csrf_token %}
-        <input type="submit" value="Logging Out?">
-    </form>
+You are logged in!
+<form action="{% url 'logout' %}" method="post">
+    {% csrf_token %}
+    <input type="submit" value="Logging Out?">
+</form>
 {% else %}
 <form action="{% url 'login' %}" action="post">
     {% csrf_token %}
@@ -12,3 +15,4 @@
     <input type="submit" value="OK">
 </form>
 {% endif %}
+{% endblock content%}
