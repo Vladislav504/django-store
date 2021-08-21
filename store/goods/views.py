@@ -24,7 +24,7 @@ class GoodView(LoginRequiredMixin, BaseView):
 
     def get(self, request, id):
         good = get_good(id)
-        selling, buying = get_uncompleted_transactions()
+        selling, buying = get_uncompleted_transactions(good=good)
         context = {'item': good, 'selling': selling, 'buying': buying}
         return render(request, self.template_name, context=context)
 
