@@ -1,13 +1,31 @@
+from store.exceptions import ResponseException
 from .models import Transaction
 
 
-class InvalidTypeOfTransaction(Exception):
+class InvalidTypeOfTransaction(ResponseException):
+    status = 400
+
+
+class TransactionNotFound(ResponseException):
+    status = 404
+
+
+class InvalidTypeOfPrice(ResponseException):
+    status = 400
     pass
+
+
+def validate_price(price: str):
+    try:
+        return float(price)
+    except Exception:
+        raise InvalidTypeOfPrice('Invalid type of price!')
 
 
 def validate_type(type_):
     if type_ not in ['sell', 'buy']:
-        raise InvalidTypeOfTransaction()
+        raise InvalidTypeOfTransaction('Invalid type of transaction type.')
+    return type_
 
 
 def create_uncompleted_transaction(user, type_, good, price):
@@ -27,7 +45,6 @@ def create_completed_transaction(user, type_, good, price):
     return trans
 
 
-
 def get_uncompleted_transactions():
     selling = Transaction.objects.filter(seller__isnull=False,
                                          completed=False,
@@ -36,3 +53,10 @@ def get_uncompleted_transactions():
                                         completed=False,
                                         buyer__isnull=False).order_by('price')
     return selling, buying
+
+
+def get_transaction(id) -> Transaction:
+    try:
+        return Transaction.objects.get(id=id)
+    except Transaction.DoesNotExist:
+        raise TransactionNotFound('Transaction with such id does not found.')

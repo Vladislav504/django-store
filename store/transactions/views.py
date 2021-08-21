@@ -1,58 +1,43 @@
-from django.core.checks.messages import Error
-from django.http.response import HttpResponseRedirect, HttpResponseBadRequest
+from django.urls import reverse
 from django.shortcuts import render
 from django.views.generic import TemplateView
-from django.urls import reverse
+from django.http.response import HttpResponseRedirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 
+from .services import get_transaction
+from .services import create_completed_transaction
+from .services import validate_type, validate_price
+from store.views import BaseView
 from wallets.services import get_balance
-from .models import Transaction
-from store.utils import validate_price
-from .services import validate_type, InvalidTypeOfTransaction, create_completed_transaction
 
 
-class ControlView(LoginRequiredMixin, TemplateView):
+class ControlView(LoginRequiredMixin, BaseView):
     template_name = 'transactions/control.html'
     error = None
 
     def get(self, request):
         return render(request,
                       self.template_name,
-                      context={'balance': get_balance(self.wallet)})
+                      context={'balance': get_balance(request.user)})
 
     def post(self, request):
-        self.get_price()
-        self.get_type()
-        if self.error:
-            return self.error
-        create_completed_transaction(self.price, self.type_)
+        price = validate_price(request.POST.get('price'))
+        type_ = validate_type(request.POST.get('type'))
+        create_completed_transaction(price, type_)
         return HttpResponseRedirect(reverse('control'))
 
-    def get_price(self):
-        try:
-            self.price = validate_price(self.request.POST['price'])
-        except ValueError:
-            self.error = HttpResponseBadRequest("Inappropriate value")
 
-    def get_type(self):
-        try:
-            self.type_ = self.request.POST['type']
-            validate_type(self.type_)
-        except InvalidTypeOfTransaction:
-            self.error = HttpResponseBadRequest("Inappropriate type")
-
-
-class BuyView(LoginRequiredMixin, TemplateView):
+class BuyView(LoginRequiredMixin, BaseView):
     template_name = 'transactions/buy.html'
 
     def get(self, request, id):
-        trans = Transaction.objects.get(id=id)
+        trans = get_transaction(id)
         return render(request,
                       self.template_name,
                       context={'transaction': trans})
 
     def post(self, request, id):
-        trans: Transaction = Transaction.objects.get(id=id)
+        trans = get_transaction(id)
         trans.buy_by(request.user)
         return HttpResponseRedirect(
             reverse('goods_detail', args=[trans.good.id]))
