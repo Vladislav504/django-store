@@ -1,0 +1,7 @@
+
+
+{% for transaction in buying %} 
+{% include 'transactions/base_list.html' %}
+<a href="{% url 'transaction_buy' transaction.id%}">Sell</a>
+<br />
+{%endfor%} 
