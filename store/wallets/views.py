@@ -8,19 +8,15 @@ from django.urls import reverse
 from transactions.services import get_uncompleted_transactions
 
 from .models import Wallet
-from .services import get_balance
 from store.views import BaseView
+
 
 class WalletsHomeView(LoginRequiredMixin, BaseView):
     template_name = 'wallets/home.html'
 
     def get(self, request):
-        balance = get_balance(
-            request.user)
 
-        return render(request,
-                      self.template_name,
-                      context={'balance': balance})
+        return render(request, self.template_name)
 
 
 class WalletsRegisterView(TemplateView):
@@ -56,10 +52,10 @@ class WalletsLoginView(TemplateView):
 
 
 class WalletsLogOutView(BaseView):
-    
     def post(self, request):
         logout(request)
         return HttpResponseRedirect(reverse('home'))
+
 
 class WalletDetailView(BaseView):
     template_name = 'wallets/wallet.html'

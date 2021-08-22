@@ -73,6 +73,7 @@ TEMPLATES = [
 STATICFILES_DIRS = [
     BASE_DIR / 'store/static',
     BASE_DIR / 'goods/static',
+    BASE_DIR / 'transactions/static',
 ]
 
 WSGI_APPLICATION = 'store.wsgi.application'

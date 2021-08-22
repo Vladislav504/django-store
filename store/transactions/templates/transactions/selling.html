@@ -1,6 +1,18 @@
-
-{% for transaction in selling %} 
-{% include 'transactions/base_list.html' %}
-<a href="{% url 'transaction_sell' transaction.id%}">Buy</a>
-<br />
-{%endfor%} 
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'tx.css' %}" />
+<div class="tx-list">
+  {% if selling %}
+  <ul>
+    {% for transaction in selling %}
+    <li>
+      {% include 'transactions/base_list.html' %}
+      <form action="{% url 'transaction_buy' transaction.id %}" method="GET">
+        <input class="button" type="submit" value="Buy" />
+      </form>
+    </li>
+    {%endfor%}
+  </ul>
+  {% else %}
+  <h1>No Sellers!</h1>
+  {% endif %}
+</div>

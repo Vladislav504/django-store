@@ -26,11 +26,11 @@
       </ul>
       {% if user.is_authenticated %}
       <ul id="user">
-        <li>Balance: {{balance}}</li>
+        <li>Balance: {{user.balance}}</li>
         <li>
           <form action="{% url 'logout' %}" method="post">
             {% csrf_token %}
-            <input type="submit" value="Logout" />
+            <input class="button" type="submit" value="Logout" />
           </form>
         </li>
       </ul>

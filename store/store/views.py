@@ -9,3 +9,5 @@ class BaseView(TemplateView):
             return super().dispatch(request, *args, **kwargs)
         except ResponseException as e:
             return HttpResponse(str(e), status=e.status)
+        except Exception as e:
+            return HttpResponse(str(e), status=500)

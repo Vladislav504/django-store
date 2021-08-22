@@ -1,10 +1,13 @@
-<h1>Buy page</h1>
-Seller: {{transaction.seller}} 
-<br>
+{% extends 'base.html' %} {% block content %}
+<h1>Buy</h1>
+Seller: {% if transaction.seller.address == user.address %} you {%else%}
+{{transaction.seller}} {%endif%}
+<br />
 Good: {{transaction.good.name}}
-<br>
+<br />
 Price: {{transaction.price}}
 <form action="{% url 'transaction_buy' transaction.id %}" method="POST">
-    {% csrf_token %}
-    <input type="submit" value="BUY">
+  {% csrf_token %}
+  <input class="button" type="submit" value="BUY" />
 </form>
+{% endblock content %}
