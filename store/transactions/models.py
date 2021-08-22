@@ -2,6 +2,7 @@ from django.db import models
 
 from wallets.models import Wallet
 from goods.models import Good
+from . import exceptions
 
 
 class Transaction(models.Model):
@@ -21,18 +22,15 @@ class Transaction(models.Model):
 
     completed = models.BooleanField(default=False)
 
-    class SellerEqualBuyer(Exception):
-        pass
-
-    class SellerAndBuyerIsMissing(Exception):
-        pass
-
     def complete(self):
         self.completed = True
         self.save(update_fields=['completed'])
 
     def buy_by(self, user):
         if not self.completed:
+            if user.balance < self.price:
+                raise exceptions.NotEnoughMoney(
+                    'Not enough money on wallet to complete transaction.')
             self.buyer = user
             self.completed = True
             self.save(update_fields=['completed', 'buyer'])
@@ -43,7 +41,7 @@ class Transaction(models.Model):
 
     def check_integrity(self):
         if self.seller is None and self.buyer is None:
-            raise self.SellerAndBuyerIsMissing(
+            raise exceptions.SellerAndBuyerIsMissing(
                 'No seller and buyer in transaction.')
         if self.seller == self.buyer:
-            raise self.SellerEqualBuyer("Seller cannot buy own goods.")
+            raise exceptions.SellerEqualBuyer("Seller cannot buy own goods.")

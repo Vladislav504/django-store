@@ -43,5 +43,5 @@ class BuyView(LoginRequiredMixin, BaseView):
             reverse('goods_detail', args=[trans.good.id]))
 
 
-class SellView(TemplateView):
+class SellView(BaseView):
     template_name = 'transactions/sell.html'

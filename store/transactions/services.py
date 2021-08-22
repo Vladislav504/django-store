@@ -1,30 +1,18 @@
-from store.exceptions import ResponseException
 from .models import Transaction
-
-
-class InvalidTypeOfTransaction(ResponseException):
-    status = 400
-
-
-class TransactionNotFound(ResponseException):
-    status = 404
-
-
-class InvalidTypeOfPrice(ResponseException):
-    status = 400
-    pass
+from . import exceptions
 
 
 def validate_price(price: str):
     try:
         return float(price)
     except Exception:
-        raise InvalidTypeOfPrice('Invalid type of price!')
+        raise exceptions.InvalidTypeOfPrice('Invalid type of price!')
 
 
 def validate_type(type_):
     if type_ not in ['sell', 'buy']:
-        raise InvalidTypeOfTransaction('Invalid type of transaction type.')
+        raise exceptions.InvalidTypeOfTransaction(
+            'Invalid type of transaction type.')
     return type_
 
 
@@ -62,4 +50,5 @@ def get_transaction(id) -> Transaction:
     try:
         return Transaction.objects.get(id=id)
     except Transaction.DoesNotExist:
-        raise TransactionNotFound('Transaction with such id does not found.')
+        raise exceptions.TransactionNotFound(
+            'Transaction with such id does not found.')
